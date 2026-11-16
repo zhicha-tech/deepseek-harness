@@ -29,6 +29,18 @@ jobs:
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Write unsigned Windows packaging settings
+        # The official loader requires .env.windows even for unsigned builds.
+        # Test-stage dummy HTTPS origins satisfy the policy parser; these
+        # installers are not connected to any update service.
+        shell: bash
+        run: |
+          cat > apps/desktop/.env.windows <<'EOF'
+          DSH_DESKTOP_APP_ID=com.deepseek.dsh
+          DSH_DESKTOP_AUTO_UPDATE_ENV=test
+          DSH_DESKTOP_MANDATORY_UPDATE_TEST_ORIGIN=https://example.com
+          DSH_DESKTOP_MANDATORY_UPDATE_CONFIG={"allowedAuthOrigins":["https://example.com"]}
+          EOF
       - name: Package unsigned Windows installer (full local build + runtime + NSIS)
         env:
           DSH_CLIENT_BUILD_PROFILE: local
@@ -51,6 +63,13 @@ jobs:
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Write unsigned macOS packaging settings
+        shell: bash
+        run: |
+          cat > apps/desktop/.env.macos <<'EOF'
+          DSH_DESKTOP_APP_ID=com.deepseek.dsh
+          DSH_DESKTOP_AUTO_UPDATE_ENV=test
+          EOF
       - name: Package unsigned macOS disk image (full local build + runtime + DMG)
         env:
           DSH_CLIENT_BUILD_PROFILE: local
