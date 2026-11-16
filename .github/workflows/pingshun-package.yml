@@ -9,6 +9,8 @@ name: Package Pingshun Buddy · unsigned test installers
 # package:mac:arm64:unsigned 命令。
 
 on:
+  push:
+    branches: [pingshun/buddy-packaging]
   workflow_dispatch:
 
 permissions:
