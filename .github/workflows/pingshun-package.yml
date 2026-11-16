@@ -1,0 +1,60 @@
+name: Package Pingshun Buddy · unsigned test installers
+
+# 测试分发专用：在 GitHub 托管 runner 上打包内置 @deepseek-ai/dsh-pingshun-buddy
+# 的桌面安装包（Windows exe / macOS dmg），不签名、不公证，不接入官方发布通道。
+# buddy bundle 与其 .env（模型服务配置）随安装包发布，用户安装后开箱即用。
+#
+# 官方 workflows（windows-package.yml / macos-package.yml）绑定 self-hosted 签名
+# 机器与发布通道，不能复用；本 workflow 只调用官方 package:win:x64:unsigned /
+# package:mac:arm64:unsigned 命令。
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Package unsigned Windows installer (full local build + runtime + NSIS)
+        env:
+          DSH_CLIENT_BUILD_PROFILE: local
+        run: pnpm --filter @deepseek-ai/dsh-desktop run package:win:x64:unsigned
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pingshun-buddy-windows-x64
+          path: apps/desktop/.desktop-build/targets/win-x64/unsigned-artifacts/*.exe
+          if-no-files-found: error
+
+  macos:
+    runs-on: macos-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Package unsigned macOS disk image (full local build + runtime + DMG)
+        env:
+          DSH_CLIENT_BUILD_PROFILE: local
+        run: pnpm --filter @deepseek-ai/dsh-desktop run package:mac:arm64:unsigned
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pingshun-buddy-macos-arm64
+          path: apps/desktop/.desktop-build/targets/mac-arm64/unsigned-artifacts/*.dmg
+          if-no-files-found: error

@@ -1,0 +1,40 @@
+# The Pingshun Buddy bundle patch, host half.
+#
+# Two Host rows:
+# - `pingshun-ui` names the package itself, so the modules node half picks up
+#   its `dsh.client` declaration and serves /plugins/@deepseek-ai/dsh-pingshun-buddy/client.js.
+# - `pingshun-runtime` mounts the runtime plugin (@deepseek-ai/dsh-pingshun-buddy/runtime): the
+#   OCR token bridge and the `buddyMode`-driven registration of the six
+#   business presets (so DeepSeek mode removes them from the Host roster).
+#
+# Presets are runtime data registered by the runtime plugin
+# (src/host/presets.ts), not static patch rows, so the mode switch adds and
+# removes them in the Host.
+
+- insert:
+    - id: pingshun-ui
+      name: '@deepseek-ai/dsh-pingshun-buddy'
+    - id: pingshun-runtime
+      name: '@deepseek-ai/dsh-pingshun-buddy/runtime'
+    - id: ui-settings-session-log   # 设置行 + toast 消失
+      disabled: true
+    - id: session-log-deepseek      # Host 上传功能关闭
+      disabled: true
+
+# 模型内置：OpenAI 兼容 provider，baseURL/apiKey 来自环境变量（.env）。
+# baseURL 缺省给一个合法占位（空字符串会被 llm-pi-ai 拒绝）；模型列表由
+# runtime 插件启动时 GET {baseURL}/models 动态填充，下面的是静态 fallback。
+# 默认模型选择由 runtime 在 Buddy 模式写入、DeepSeek 模式还原，不在此静态指定。
+- id: llm-pi-ai
+  config:
+    providers:
+      pingshun:
+        displayName: 平顺模型服务
+        api: openai-completions
+        baseURL: !!js "process.env.PINGSHUN_LLM_BASE_URL ?? 'http://localhost:8000/v1'"
+        apiKeyEnv: PINGSHUN_LLM_API_KEY
+        models:
+          - id: pingshun-default
+            name: 平顺默认模型
+            contextWindow: 131072
+            maxTokens: 8192
