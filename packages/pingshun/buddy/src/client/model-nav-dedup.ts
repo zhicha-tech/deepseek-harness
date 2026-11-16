@@ -30,9 +30,14 @@ export function createModelNavDedup(): ModelNavDedup {
   const dedup = (): void => {
     // The settings shell renders one `navCell` row per registration. Hide the
     // whole CELL (not just its label), targeting the native row that sorts
-    // last (our section registers order 9, the native one order 10).
+    // last (our section registers order 9, the native one order 10). Match
+    // both locale forms: our section's label is always 模型; the native row
+    // follows the shell locale (模型 in zh, Models in en).
     const rows = [...document.querySelectorAll<HTMLElement>('[class*="navCell"]')]
-      .filter(el => el.textContent?.trim() === '模型' && el.style.display !== 'none')
+      .filter((el) => {
+        const text = el.textContent?.trim()
+        return (text === '模型' || text === 'Models') && el.style.display !== 'none'
+      })
     if (rows.length < 2) return
     const native = rows[rows.length - 1]
     if (native !== undefined) {
