@@ -21,9 +21,9 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 240
     steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@v7.0.1
+      - uses: pnpm/action-setup@v5.0.0
+      - uses: actions/setup-node@v7.0.0
         with:
           node-version: '24'
           cache: pnpm
@@ -45,7 +45,7 @@ jobs:
         env:
           DSH_CLIENT_BUILD_PROFILE: local
         run: pnpm --filter @deepseek-ai/dsh-desktop run package:win:x64:unsigned
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@v7.0.1
         with:
           name: pingshun-buddy-windows-x64
           path: apps/desktop/.desktop-build/targets/win-x64/unsigned-artifacts/*.exe
@@ -55,9 +55,9 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 240
     steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@v7.0.1
+      - uses: pnpm/action-setup@v5.0.0
+      - uses: actions/setup-node@v7.0.0
         with:
           node-version: '24'
           cache: pnpm
@@ -74,7 +74,7 @@ jobs:
         env:
           DSH_CLIENT_BUILD_PROFILE: local
         run: pnpm --filter @deepseek-ai/dsh-desktop run package:mac:arm64:unsigned
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@v7.0.1
         with:
           name: pingshun-buddy-macos-arm64
           path: apps/desktop/.desktop-build/targets/mac-arm64/unsigned-artifacts/*.dmg
