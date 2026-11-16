@@ -40,7 +40,7 @@ function seedHead(): void {
 }
 
 /** Flush MutationObserver callbacks (microtask-scheduled). */
-const flush = (): Promise<void> => new Promise(resolve => { setTimeout(resolve, 0) })
+const flush = (): Promise<void> => new Promise((resolve) => { setTimeout(resolve, 0) })
 
 afterEach(() => {
   document.head.innerHTML = ''

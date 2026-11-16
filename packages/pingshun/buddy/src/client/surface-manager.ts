@@ -57,6 +57,10 @@ export interface SurfaceServices {
     provider: { displayName: string; baseUrl: string; models: readonly string[] }
     defaultModel: string
   }>
+  /** Read the discovered model catalog and the current default model. */
+  readonly readModelSelection: () => Promise<import('./model-select.ts').ModelSelectionInfo>
+  /** Persist the chosen model as the default selection. */
+  readonly selectModel: (model: string) => Promise<void>
 }
 
 /** One mode-driven surface pair with idempotent enter/exit. */
@@ -148,19 +152,24 @@ export function createBuddySurfaces(ctx: Context, services: SurfaceServices): Bu
       },
       {
         slot: 'conversation.input.model',
-        // Read-only model chip: the deployment's model service is built in,
-        // so the composer shows a static label instead of the picker.
+        // Model picker chip: catalog-only dropdown (managed endpoint/key
+        // never shown). The inject face lives in the register options.
         register: () => ctx.slots.register({
           name: 'conversation.input.model',
           priority: SHADOW_PRIORITY,
           locale: NS,
+          inject: (): import('./model-chip-readonly.tsx').ModelChipInjected => ({
+            readModelSelection: services.readModelSelection,
+            selectModel: services.selectModel,
+          }),
         }, ModelChipReadonly),
       },
       {
         slot: 'settings.section',
-        // Read-only Models section: shadows the native editor (same list id
-        // `models`, lower priority) with a display-only summary of the
-        // built-in model service; DeepSeek mode restores the native editor.
+        // Model picker: shadows the native editor (same list id `models`,
+        // lower priority) with a catalog-only selector; the endpoint and API
+        // key are managed and never displayed. DeepSeek mode restores the
+        // native editor.
         register: () => ctx.slots.register({
           name: 'settings.section',
           id: 'models',
@@ -168,7 +177,10 @@ export function createBuddySurfaces(ctx: Context, services: SurfaceServices): Bu
           order: 9,
           label: () => '模型',
           locale: NS,
-          inject: () => ({ readModelInfo: services.readModelInfo }),
+          inject: (): import('./model-section-readonly.tsx').ModelSectionInjected => ({
+            readModelSelection: services.readModelSelection,
+            selectModel: services.selectModel,
+          }),
         }, ModelSectionReadonly),
       },
       {

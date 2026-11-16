@@ -73,8 +73,8 @@ const manifest = JSON.parse(readFileSync(projectPackageJson, 'utf8')) as {
 manifest.dependencies['@deepseek-ai/dsh-pingshun-buddy'] = 'link:' + join(repoRoot, 'packages', 'pingshun', 'buddy')
 if (!manifest.dsh.profile.bundles.includes('@deepseek-ai/dsh-pingshun-buddy')) manifest.dsh.profile.bundles.push('@deepseek-ai/dsh-pingshun-buddy')
 writeFileSync(projectPackageJson, JSON.stringify(manifest, null, 2))
-mkdirSync(join(prepared, 'node_modules', '@pingshun'), { recursive: true })
-try { symlinkSync(join(repoRoot, 'packages', 'pingshun', 'buddy'), join(prepared, 'node_modules', '@pingshun', 'buddy'), 'dir') } catch { /* exists */ }
+mkdirSync(join(prepared, 'node_modules', '@deepseek-ai'), { recursive: true })
+try { symlinkSync(join(repoRoot, 'packages', 'pingshun', 'buddy'), join(prepared, 'node_modules', '@deepseek-ai', 'dsh-pingshun-buddy'), 'dir') } catch { /* exists */ }
 
 const home = join(developmentRoot, 'home')
 const userData = join(developmentRoot, 'electron-user-data')

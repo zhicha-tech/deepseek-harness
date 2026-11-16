@@ -24,6 +24,7 @@ import { en, zh, type PingshunLocaleKey } from './locales.ts'
 import { createBuddySurfaces, type BuddySurfaces } from './surface-manager.ts'
 import { createBrandManager } from './brand-manager.ts'
 import { createModelNavDedup } from './model-nav-dedup.ts'
+import { readModelSelection, selectModel } from './model-select.ts'
 import type { OcrSettingsAccess } from './settings-panel.tsx'
 
 declare module '@deepseek-ai/dsh-client-ui-slots' {
@@ -126,6 +127,8 @@ export function apply(ctx: Context): void {
     listInventory: () => listInventory(ctx),
     ocrSettings: ocrSettings(ctx),
     readModelInfo: () => readModelInfo(ctx),
+    readModelSelection: () => readModelSelection(ctx),
+    selectModel: (model: string) => selectModel(ctx, model),
   })
   const brand = createBrandManager(ctx)
   const modelNavDedup = createModelNavDedup()

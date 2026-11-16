@@ -62,6 +62,8 @@ function makeServices(): SurfaceServices {
       provider: { displayName: '内置模型服务', baseUrl: 'http://test/v1', models: ['m1'] },
       defaultModel: 'pingshun/m1',
     }),
+    readModelSelection: async () => ({ models: ['m1', 'm2'], current: 'm1' }),
+    selectModel: async () => {},
   }
 }
 

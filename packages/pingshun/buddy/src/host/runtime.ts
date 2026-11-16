@@ -21,6 +21,7 @@ import { loadBundleEnv } from './env-file.ts'
 // Type-only: pulls the settings service and default-model service Context merges.
 import type {} from '@deepseek-ai/dsh-settings'
 import type {} from '@deepseek-ai/dsh-agent-default-model'
+import { credentialRef } from '@deepseek-ai/dsh-credentials'
 
 /** Settings namespace and Cordis row id. */
 export const RUNTIME_NAMESPACE = 'pingshun-runtime'
@@ -204,6 +205,35 @@ export function apply(ctx: Context, config: Config): void {
     }
   }
 
+  // Built-in model credential: llm-pi-ai resolves `apiKeyEnv` through the
+  // credentials service FIRST and the launch-environment snapshot only as a
+  // fallback. The bundle .env loads at plugin activation — after the launch
+  // snapshot was captured — so the key must be stored through the credentials
+  // service (the same write path the web Models page uses). A key already
+  // stored through the credentials service always wins; this write is skipped
+  // when the stored value already matches the bundle key.
+  const ensureModelCredential = async (): Promise<void> => {
+    const apiKey = fallbackOf('PINGSHUN_LLM_API_KEY')
+    if (apiKey === undefined || apiKey.length === 0) {
+      ctx.logger.warn('pingshun-runtime: PINGSHUN_LLM_API_KEY 未设置（.env / 环境变量均无）')
+      return
+    }
+    const credentials = ctx.get('credentials', false)
+    if (credentials === undefined) {
+      ctx.logger.warn('pingshun-runtime: credentials 服务不可用，模型凭据未写入')
+      return
+    }
+    const ref = credentialRef('PINGSHUN_LLM_API_KEY')
+    try {
+      const existing = await credentials.resolve(ref)
+      if (existing?.value === apiKey) return
+      await credentials.set(ref, apiKey)
+      ctx.logger.info('pingshun-runtime: 模型服务凭据已写入 credentials 服务')
+    } catch (error) {
+      ctx.logger.warn(`pingshun-runtime: 模型服务凭据写入失败：${String(error)}`)
+    }
+  }
+
   const syncMode = async (): Promise<void> => {
     if (running) {
       // A reconciliation is already in flight; ask it to run once more with
@@ -231,7 +261,10 @@ export function apply(ctx: Context, config: Config): void {
           // service. These run SEQUENTIALLY in one detached chain: settings
           // updates are HMR transactions that cannot nest, so the two writes
           // must not run concurrently. Discovery never blocks the roster.
+          // The credential write precedes both so the first model request
+          // already resolves the key through the credentials service.
           void (async () => {
+            await ensureModelCredential()
             await saveUserSelection()
             await syncModels()
           })().catch((error: unknown) => {

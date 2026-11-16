@@ -135,7 +135,7 @@ export function BuddyPanel({ useRoster, uiWorkspace, refreshRoster, t, useSessio
         <>
           <div className={css.sectionLabel}>{t('panel.sessions')}</div>
           {sessions.length === 0 && <div className={css.empty}>{t('panel.empty')}</div>}
-          {sessions.map(session => {
+          {sessions.map((session) => {
             const catalog = BUDDY_CATALOG.find(entry => entry.presetId === session.preset)
             const title = session.title !== '' ? session.title : catalog?.name ?? t('panel.newSession')
             const sameDay = new Date(session.updatedAt)
