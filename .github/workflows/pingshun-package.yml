@@ -4,6 +4,10 @@ name: Package Pingshun Buddy · unsigned test installers
 # 的桌面安装包（Windows exe / macOS dmg），不签名、不公证，不接入官方发布通道。
 # buddy bundle 与其 .env（模型服务配置）随安装包发布，用户安装后开箱即用。
 #
+# 品牌：产品名/显示名/appId/图标全部由环境变量覆盖为平顺 Buddy；
+# 路径与技术标识使用 ASCII 的 pingshunbuddy，显示文本使用「平顺 Buddy」。
+# NSIS 多语言安装文本里的 DeepSeek Harness 在打包前替换为显示名。
+#
 # 官方 workflows（windows-package.yml / macos-package.yml）绑定 self-hosted 签名
 # 机器与发布通道，不能复用；本 workflow 只调用官方 package:win:x64:unsigned /
 # package:mac:arm64:unsigned 命令。
@@ -29,18 +33,49 @@ jobs:
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Write unsigned Windows packaging settings
+      - name: Write unsigned Windows packaging settings (Pingshun branding)
         # The official loader requires .env.windows even for unsigned builds.
         # Test-stage dummy HTTPS origins satisfy the policy parser; these
         # installers are not connected to any update service.
+        # Branding: productName drives install paths (ASCII pingshunbuddy);
+        # displayName is the user-visible 平顺 Buddy; icons come from the
+        # buddy bundle's generated resources.
         shell: bash
         run: |
           cat > apps/desktop/.env.windows <<'EOF'
-          DSH_DESKTOP_APP_ID=com.deepseek.dsh
+          DSH_DESKTOP_APP_ID=com.pingshun.buddy.local
           DSH_DESKTOP_AUTO_UPDATE_ENV=test
           DSH_DESKTOP_MANDATORY_UPDATE_TEST_ORIGIN=https://example.com
           DSH_DESKTOP_MANDATORY_UPDATE_CONFIG={"allowedAuthOrigins":["https://example.com"]}
+          DSH_DESKTOP_PRODUCT_NAME=pingshunbuddy
+          DSH_DESKTOP_DISPLAY_NAME=平顺 Buddy
+          DSH_DESKTOP_ICON_WINDOWS=$GITHUB_WORKSPACE/packages/pingshun/buddy/resources/icon-windows.png
+          DSH_DESKTOP_TRAY_WINDOWS=$GITHUB_WORKSPACE/packages/pingshun/buddy/resources/tray-windows.ico
           EOF
+      - name: Rebrand NSIS installer locale strings and publisher
+        # The installer locale JSONs hardcode "DeepSeek Harness" in wizard
+        # messages (launch failed / already running / path ownership). Replace
+        # with the Buddy display name in the CI workspace before packaging.
+        # package.json author.name is the NSIS publisher/company field.
+        shell: bash
+        run: |
+          node -e '
+            const fs = require("node:fs");
+            const dir = "apps/desktop/installer/locales";
+            for (const file of fs.readdirSync(dir)) {
+              if (!file.endsWith(".json")) continue;
+              const path = dir + "/" + file;
+              const text = fs.readFileSync(path, "utf8");
+              fs.writeFileSync(path, text.split("DeepSeek Harness").join("平顺 Buddy"));
+            }
+            const manifestPath = "apps/desktop/package.json";
+            const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+            if (manifest.author && typeof manifest.author === "object") {
+              manifest.author.name = "平顺 Buddy";
+              fs.writeFileSync(manifestPath, JSON.stringify(manifest, undefined, 2) + "\n");
+            }
+            console.log("NSIS locales and publisher rebranded to 平顺 Buddy");
+          '
       - name: Package unsigned Windows installer (full local build + runtime + NSIS)
         env:
           DSH_CLIENT_BUILD_PROFILE: local
@@ -63,12 +98,15 @@ jobs:
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Write unsigned macOS packaging settings
+      - name: Write unsigned macOS packaging settings (Pingshun branding)
         shell: bash
         run: |
           cat > apps/desktop/.env.macos <<'EOF'
-          DSH_DESKTOP_APP_ID=com.deepseek.dsh
+          DSH_DESKTOP_APP_ID=com.pingshun.buddy.local
           DSH_DESKTOP_AUTO_UPDATE_ENV=test
+          DSH_DESKTOP_PRODUCT_NAME=pingshunbuddy
+          DSH_DESKTOP_DISPLAY_NAME=平顺 Buddy
+          DSH_DESKTOP_ICON_MACOS=$GITHUB_WORKSPACE/packages/pingshun/buddy/resources/icon-macos.png
           EOF
       - name: Package unsigned macOS disk image (full local build + runtime + DMG)
         env:
