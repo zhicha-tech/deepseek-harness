@@ -39,10 +39,13 @@ jobs:
         # installers are not connected to any update service.
         # Branding: productName drives install paths (ASCII pingshunbuddy);
         # displayName is the user-visible 平顺 Buddy; icons come from the
-        # buddy bundle's generated resources.
+        # buddy bundle's generated resources. The heredoc is UNQUOTED so
+        # $GITHUB_WORKSPACE expands into absolute icon paths (a quoted heredoc
+        # would leave the literal variable name and electron-builder would fall
+        # back to the stock Electron icon).
         shell: bash
         run: |
-          cat > apps/desktop/.env.windows <<'EOF'
+          cat > apps/desktop/.env.windows <<EOF
           DSH_DESKTOP_APP_ID=com.pingshun.buddy.local
           DSH_DESKTOP_AUTO_UPDATE_ENV=test
           DSH_DESKTOP_MANDATORY_UPDATE_TEST_ORIGIN=https://example.com
@@ -52,6 +55,19 @@ jobs:
           DSH_DESKTOP_ICON_WINDOWS=$GITHUB_WORKSPACE/packages/pingshun/buddy/resources/icon-windows.png
           DSH_DESKTOP_TRAY_WINDOWS=$GITHUB_WORKSPACE/packages/pingshun/buddy/resources/tray-windows.ico
           EOF
+      - name: Copy Buddy installer brand assets
+        # The custom NSIS wizard paints brand.bmp / brand-dark.bmp (and their
+        # 2x variants) converted from apps/desktop/installer/assets/*.png by
+        # prepare-windows-installer.ps1. Replace those sources with the Buddy
+        # brand images so the wizard shows the Buddy mark instead of the
+        # DeepSeek whale.
+        shell: bash
+        run: |
+          cp packages/pingshun/buddy/resources/installer-brand.png apps/desktop/installer/assets/brand.png
+          cp packages/pingshun/buddy/resources/installer-brand-2x.png apps/desktop/installer/assets/brand-2x.png
+          cp packages/pingshun/buddy/resources/installer-brand-dark.png apps/desktop/installer/assets/brand-dark.png
+          cp packages/pingshun/buddy/resources/installer-brand-dark-2x.png apps/desktop/installer/assets/brand-dark-2x.png
+          cp packages/pingshun/buddy/resources/uninstaller-sidebar.png apps/desktop/installer/assets/uninstaller-sidebar.png
       - name: Rebrand desktop UI strings, NSIS locales and publisher
         # apps/desktop/src/locale.ts carries 96 user-visible "DeepSeek Harness"
         # strings (about panel, about/hide/quit/open menus, quit confirmation,

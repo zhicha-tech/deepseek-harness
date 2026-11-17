@@ -168,6 +168,24 @@ export function createBrandManager(ctx: Context): BrandManager {
     for (const { element } of savedIcons) element.setAttribute('href', FAVICON_HREF)
   }
 
+  // PixelWhale is a `conversation.hero.frame` HOC occupant; hoc slots compose
+  // (every occupant wraps the body), so a shadow cannot replace it. Hide its
+  // background whale-breach canvas with one injected rule instead — the canvas
+  // stays mounted but never paints, and blank clicks no longer show any
+  // animation. The rule is removed when DeepSeek mode restores the frame.
+  let whaleStyle: HTMLStyleElement | undefined
+  const hideWhaleCanvas = (): void => {
+    if (whaleStyle !== undefined) return
+    whaleStyle = document.createElement('style')
+    whaleStyle.dataset.pingshunBuddy = 'whale-canvas'
+    whaleStyle.textContent = 'canvas[data-home-whale] { display: none !important; }'
+    document.head.append(whaleStyle)
+  }
+  const restoreWhaleCanvas = (): void => {
+    whaleStyle?.remove()
+    whaleStyle = undefined
+  }
+
   const restoreIcons = (): void => {
     for (const { element, href } of savedIcons) {
       if (href === null) element.removeAttribute('href')
@@ -197,6 +215,7 @@ export function createBrandManager(ctx: Context): BrandManager {
     watchTitle()
     watchHero()
     replaceIcons()
+    hideWhaleCanvas()
   }
 
   const exit = (): void => {
@@ -205,6 +224,7 @@ export function createBrandManager(ctx: Context): BrandManager {
     unwatchTitle()
     unwatchHero()
     restoreIcons()
+    restoreWhaleCanvas()
   }
 
   return { enter, exit }
