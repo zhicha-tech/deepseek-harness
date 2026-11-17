@@ -52,15 +52,22 @@ jobs:
           DSH_DESKTOP_ICON_WINDOWS=$GITHUB_WORKSPACE/packages/pingshun/buddy/resources/icon-windows.png
           DSH_DESKTOP_TRAY_WINDOWS=$GITHUB_WORKSPACE/packages/pingshun/buddy/resources/tray-windows.ico
           EOF
-      - name: Rebrand NSIS installer locale strings and publisher
-        # The installer locale JSONs hardcode "DeepSeek Harness" in wizard
-        # messages (launch failed / already running / path ownership). Replace
-        # with the Buddy display name in the CI workspace before packaging.
-        # package.json author.name is the NSIS publisher/company field.
+      - name: Rebrand desktop UI strings, NSIS locales and publisher
+        # apps/desktop/src/locale.ts carries 96 user-visible "DeepSeek Harness"
+        # strings (about panel, about/hide/quit/open menus, quit confirmation,
+        # startup failure, welcome title) across 8 languages; main.ts hardcodes
+        # the about-panel applicationName. Replace all with the Buddy display
+        # name in the CI workspace before the desktop build compiles them.
+        # NSIS locale JSONs carry wizard messages; package.json author.name is
+        # the NSIS publisher/company field.
         shell: bash
         run: |
           node -e '
             const fs = require("node:fs");
+            for (const path of ["apps/desktop/src/locale.ts", "apps/desktop/src/main.ts"]) {
+              const text = fs.readFileSync(path, "utf8");
+              fs.writeFileSync(path, text.split("DeepSeek Harness").join("平顺 Buddy"));
+            }
             const dir = "apps/desktop/installer/locales";
             for (const file of fs.readdirSync(dir)) {
               if (!file.endsWith(".json")) continue;
@@ -74,7 +81,7 @@ jobs:
               manifest.author.name = "平顺 Buddy";
               fs.writeFileSync(manifestPath, JSON.stringify(manifest, undefined, 2) + "\n");
             }
-            console.log("NSIS locales and publisher rebranded to 平顺 Buddy");
+            console.log("Desktop UI strings, NSIS locales and publisher rebranded to 平顺 Buddy");
           '
       - name: Package unsigned Windows installer (full local build + runtime + NSIS)
         env:
@@ -108,6 +115,26 @@ jobs:
           DSH_DESKTOP_DISPLAY_NAME=平顺 Buddy
           DSH_DESKTOP_ICON_MACOS=$GITHUB_WORKSPACE/packages/pingshun/buddy/resources/icon-macos.png
           EOF
+      - name: Rebrand desktop UI strings and publisher (macOS)
+        # Same locale.ts / main.ts replacement as the Windows job: the macOS
+        # application menu's About/Hide/Quit items and the about panel all
+        # carry the product name.
+        shell: bash
+        run: |
+          node -e '
+            const fs = require("node:fs");
+            for (const path of ["apps/desktop/src/locale.ts", "apps/desktop/src/main.ts"]) {
+              const text = fs.readFileSync(path, "utf8");
+              fs.writeFileSync(path, text.split("DeepSeek Harness").join("平顺 Buddy"));
+            }
+            const manifestPath = "apps/desktop/package.json";
+            const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+            if (manifest.author && typeof manifest.author === "object") {
+              manifest.author.name = "平顺 Buddy";
+              fs.writeFileSync(manifestPath, JSON.stringify(manifest, undefined, 2) + "\n");
+            }
+            console.log("Desktop UI strings and publisher rebranded to 平顺 Buddy");
+          '
       - name: Package unsigned macOS disk image (full local build + runtime + DMG)
         env:
           DSH_CLIENT_BUILD_PROFILE: local
