@@ -186,7 +186,7 @@ export function apply(ctx: Context, config: Config): void {
         providers: {
           pingshun: {
             displayName: '平顺模型服务',
-            api: 'openai-completions',
+            api: 'openai-responses',
             baseURL: environment.baseUrl,
             apiKeyEnv: 'PINGSHUN_LLM_API_KEY',
             models: [...models],
