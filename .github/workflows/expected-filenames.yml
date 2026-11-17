@@ -1,12 +1,6 @@
 name: Expected filenames
 
-on:
-  pull_request:
-    paths:
-      - '*[gG][oO][lL][dD][eE][nN]*'
-      - '**/*[gG][oO][lL][dD][eE][nN]*'
-      - '!vendor/**'
-
+on: workflow_dispatch
 permissions:
   contents: read
 

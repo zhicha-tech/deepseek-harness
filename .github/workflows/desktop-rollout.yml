@@ -2,29 +2,7 @@ name: Publish Desktop · Rollout & Website
 
 run-name: Rollout Desktop package ${{ inputs.package_run_id }} / attempt ${{ inputs.package_run_attempt }} · ${{ inputs.rollout_percentage && format('{0}%', inputs.rollout_percentage) || 'website only' }}
 
-on:
-  workflow_dispatch:
-    inputs:
-      package_run_id:
-        description: '已经完成首次 COS 发布的 Package Desktop run ID'
-        type: string
-        required: true
-      rollout_percentage:
-        description: '目标放量比例：0–100 整数，只允许保持或增加；留空只发布官网'
-        type: string
-        required: false
-        default: ''
-      upload_website:
-        description: '上传已发布版本的官网安装包并刷新缓存（仅 production，不要求放量达到 100%）'
-        type: boolean
-        default: false
-        required: true
-      package_run_attempt:
-        description: '已发布的原打包 attempt；默认 1，请核对原 run'
-        type: string
-        required: true
-        default: '1'
-
+on: workflow_dispatch
 permissions:
   contents: read
   actions: read

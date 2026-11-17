@@ -2,29 +2,7 @@ name: Publish Desktop · COS
 
 run-name: Publish Desktop package ${{ inputs.package_run_id }} / attempt ${{ inputs.package_run_attempt || 'latest' }}
 
-on:
-  workflow_dispatch:
-    inputs:
-      package_run_id:
-        description: '打包运行 ID：填写成功的 Package Desktop run ID；发布环境和 release ID 沿用原包'
-        type: string
-        required: true
-      staging_percentage:
-        description: '更新灰度比例：0–100 整数，默认 100；留空沿用包内值，作用于原包所属渠道'
-        type: string
-        required: false
-        default: '100'
-      upload_website:
-        description: '同时上传官网安装包并刷新缓存（仅 production）；取消后仅执行版本与自动更新发布'
-        type: boolean
-        default: true
-        required: true
-      package_run_attempt:
-        description: '打包尝试次数：留空选择最新一次，且必须成功；失败时不会回退到旧包'
-        type: string
-        required: false
-        default: ''
-
+on: workflow_dispatch
 permissions:
   contents: read
   actions: read

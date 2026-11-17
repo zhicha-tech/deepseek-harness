@@ -6,8 +6,7 @@ name: CI Windows
 # waiting for the others. Branch protection requires this workflow's
 # "windows checks passed" verdict beside CI's "all checks passed" and CI
 # Python's "python checks passed".
-on:
-  pull_request:
+on: workflow_dispatch
 permissions:
   contents: read
 

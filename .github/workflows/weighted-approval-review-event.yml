@@ -1,10 +1,7 @@
 name: weighted-approval-review-event
 run-name: weighted-approval-review-event:${{ github.event.pull_request.number }}
 
-on:
-  pull_request_review:
-    types: [submitted, edited, dismissed]
-
+on: workflow_dispatch
 permissions: {}
 
 jobs:

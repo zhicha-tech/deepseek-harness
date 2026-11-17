@@ -1,19 +1,6 @@
 name: Package CUA helper · Windows · x64
 
-on:
-  workflow_dispatch:
-  workflow_call:
-    outputs:
-      artifact-id:
-        description: '包含 win-x64 helper ZIP 的产物编号'
-        value: ${{ jobs.package.outputs.artifact-id }}
-      run-id:
-        description: '产物所属的构建运行编号'
-        value: ${{ jobs.package.outputs.run-id }}
-      build-key:
-        description: '提交 SHA、.NET SDK 版本和 win-x64 RID 的 SHA-256 摘要'
-        value: ${{ jobs.package.outputs.build-key }}
-
+on: workflow_dispatch
 permissions:
   contents: read
 

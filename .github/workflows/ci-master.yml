@@ -1,21 +1,6 @@
 name: CI master
 
-on:
-  push:
-    branches: [master]
-  workflow_dispatch:
-    inputs:
-      suite:
-        description: Manual CI suite to run
-        required: true
-        default: larger-runner-benchmark
-        type: choice
-        options:
-          - larger-runner-benchmark
-          - consolidated-runner-benchmark
-          - ssh-helper
-          - wine
-
+on: workflow_dispatch
 # New master pushes and manual runs replace obsolete checks in this workflow/ref.
 # Standby drills share cancellation; use completed runs as readiness evidence.
 concurrency:

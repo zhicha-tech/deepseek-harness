@@ -10,9 +10,7 @@
 # again on master.
 name: Deploy documentation
 
-on:
-  workflow_dispatch:
-
+on: workflow_dispatch
 concurrency:
   group: github-pages
   cancel-in-progress: false

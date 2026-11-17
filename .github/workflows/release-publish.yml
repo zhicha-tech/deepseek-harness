@@ -5,20 +5,7 @@
 # so the bytes uploaded are exactly what this dispatch produced.
 name: Release publish (dsh)
 
-on:
-  workflow_dispatch:
-    inputs:
-      cua_macos_run_id:
-        description: 'macOS CUA helper run ID，留空复用源码逐字节一致的产物，无匹配则构建'
-        type: string
-        required: false
-        default: ''
-      skip-tag-check:
-        description: Skip release tag validation for the selected ref; other publication checks still apply.
-        type: boolean
-        required: false
-        default: false
-
+on: workflow_dispatch
 permissions:
   contents: read
   actions: read

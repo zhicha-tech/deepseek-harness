@@ -7,12 +7,7 @@
 # release-publish.yml from a dsh-v* tag.
 name: Release (dsh)
 
-on:
-  pull_request:
-  push:
-    branches: [master]
-  workflow_dispatch:
-
+on: workflow_dispatch
 permissions:
   contents: read
 

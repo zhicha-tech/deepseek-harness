@@ -8,12 +8,7 @@
 # its own tag.
 name: Release (vendor)
 
-on:
-  pull_request:
-  push:
-    branches: [master]
-  workflow_dispatch:
-
+on: workflow_dispatch
 permissions:
   contents: read
 

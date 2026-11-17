@@ -5,15 +5,7 @@
 # publishing so the bytes uploaded are exactly what this dispatch produced.
 name: Release publish (vendor)
 
-on:
-  workflow_dispatch:
-    inputs:
-      dist-tag:
-        description: Optional unused npm channel. Leave empty for latest (stable) or next (prerelease).
-        required: false
-        type: string
-        default: ''
-
+on: workflow_dispatch
 permissions:
   contents: read
 
