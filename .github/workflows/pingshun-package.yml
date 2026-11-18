@@ -33,6 +33,23 @@ jobs:
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Inject model API key from the repository secret
+        # The committed .env carries a placeholder so no real key lives in git.
+        # Replace it with the Actions secret before packing; the installer still
+        # ships the resolved key so recipients get a working managed service.
+        env:
+          PINGSHUN_LLM_API_KEY: ${{ secrets.PINGSHUN_LLM_API_KEY }}
+        shell: bash
+        run: |
+          node -e '
+            const fs = require("node:fs");
+            const path = "packages/pingshun/buddy/.env";
+            const key = process.env.PINGSHUN_LLM_API_KEY ?? "";
+            if (key.length === 0) throw new Error("PINGSHUN_LLM_API_KEY secret is not set");
+            const text = fs.readFileSync(path, "utf8");
+            fs.writeFileSync(path, text.replace("__PINGSHUN_LLM_API_KEY__", key));
+            console.log("model API key injected into the bundle .env");
+          '
       - name: Write unsigned Windows packaging settings (Pingshun branding)
         # The official loader requires .env.windows even for unsigned builds.
         # Test-stage dummy HTTPS origins satisfy the policy parser; these
@@ -121,6 +138,20 @@ jobs:
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Inject model API key from the repository secret
+        env:
+          PINGSHUN_LLM_API_KEY: ${{ secrets.PINGSHUN_LLM_API_KEY }}
+        shell: bash
+        run: |
+          node -e '
+            const fs = require("node:fs");
+            const path = "packages/pingshun/buddy/.env";
+            const key = process.env.PINGSHUN_LLM_API_KEY ?? "";
+            if (key.length === 0) throw new Error("PINGSHUN_LLM_API_KEY secret is not set");
+            const text = fs.readFileSync(path, "utf8");
+            fs.writeFileSync(path, text.replace("__PINGSHUN_LLM_API_KEY__", key));
+            console.log("model API key injected into the bundle .env");
+          '
       - name: Write unsigned macOS packaging settings (Pingshun branding)
         shell: bash
         run: |
